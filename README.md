@@ -9,8 +9,8 @@ Extensão Chrome/Edge que abre automaticamente um slideshow com as matérias da 
 Cada matéria ocupa a tela inteira mostrando:
 
 - **Período** — "Expediente" (azul) ou "Ordem do Dia" (dourado) — clicável para saltar para a seção
-- **Título** — ex: *Projeto de Lei Ordinária nº 119 de 2026*
-- **Autor** — ex: *Lucas do Zé Maria*
+- **Título** — ex: *Projeto de Lei Ordinária nº XXX de 2026*
+- **Autor** — ex: *Vereador*
 - **Ementa** — texto descritivo da matéria
 
 O slide da **capa** aparece antes das matérias e mostra o título da sessão, a data e os totais por período.
