@@ -98,7 +98,23 @@ No início do arquivo, encontre o bloco marcado com `PERSONALIZAÇÃO` e ajuste 
 
 Para o **tema claro** (sapl-pauta-telaon-claro), os mesmos campos existem mas a paleta de fundo é diferente. As instruções são idênticas.
 
-### Passo 4 — Substituir o logo (opcional)
+### Passo 4 — Personalizar o banner de aviso (LGPD ou outro)
+
+O banner azul no rodapé exibe o aviso de gravação/transmissão. Para personalizá-lo, abra `display-pauta.html`:
+
+**Alterar a cor** — localize `.lgpd-banner` no CSS e troque o valor de `background`:
+```css
+background: #1059c1;  /* ← coloque aqui a cor da sua instituição */
+```
+
+**Alterar o texto** — localize o bloco `<!-- BANNER DE AVISO -->` no HTML e edite o conteúdo do `<p>`:
+```html
+<p class="lgpd-text">Seu texto aqui.</p>
+```
+
+**Remover o banner** — apague o bloco `<div class="lgpd-banner">...</div>` no HTML e os blocos CSS `.lgpd-banner`, `.lgpd-logo` e `.lgpd-text`.
+
+### Passo 5 — Substituir o logo (opcional)
 
 Substitua o arquivo `logo.png` pelo brasão da sua Câmara. Recomendado: fundo transparente ou preto, formato PNG, pelo menos 200×200 px.
 
