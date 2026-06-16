@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAPL – Pauta da Sessão</title>
+  <style>
+    /* ── Reset ─────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       PERSONALIZAÇÃO — adapte esta seção para as cores da sua instituição
+       ══════════════════════════════════════════════════════════════════════ */
+    :root {
+      /* --- Fundos e superfícies ----------------------------------------- */
+      --bg:       #07080f;   /* fundo principal da tela                      */
+      --surface:  #0b0f1c;   /* topbar (cabeçalho) e rodapé                 */
+      --surface2: #111826;   /* fundo do seletor de intervalo                */
+      --border:   rgba(255,255,255,0.06);  /* linhas divisórias sutis        */
+      --border2:  rgba(255,255,255,0.10);
+
+      /* --- Textos --------------------------------------------------------- */
+      --t1: #f0f4ff;                    /* texto principal (título, ementa)  */
+      --t2: rgba(178,194,240,0.75);     /* texto secundário (autor, relógio) */
+      --t3: rgba(130,150,210,0.42);     /* labels apagados (AUTOR, EMENTA)   */
+
+      /* --- Cor do EXPEDIENTE --------------------------------------------- */
+      /* Troque #3b82f6 pela cor primária da sua instituição               */
+      --exp:        #3b82f6;
+      --exp-dim:    rgba(59,130,246,0.14);   /* fundo do badge              */
+      --exp-border: rgba(59,130,246,0.30);   /* borda do badge              */
+      --exp-glow:   rgba(59,130,246,0.18);   /* brilho de fundo da tela     */
+      --exp-text:   #93c5fd;                 /* texto do badge              */
+
+      /* --- Cor da ORDEM DO DIA ------------------------------------------- */
+      /* Troque #f59e0b pela cor secundária da sua instituição             */
+      --ord:        #f59e0b;
+      --ord-dim:    rgba(245,158,11,0.13);
+      --ord-border: rgba(245,158,11,0.28);
+      --ord-glow:   rgba(245,158,11,0.16);
+      --ord-text:   #fcd34d;
+
+      /* Não altere abaixo — são aliases usados dinamicamente pelo JS     */
+      --accent:      var(--exp);
+      --accent-glow: var(--exp-glow);
+      --accent-text: var(--exp-text);
+      --transition:  0.5s ease;
+    }
+    /* ══════════════════════════════════════════════════════════════════════ */
+
+    /* ── Base ──────────────────────────────────────────────────────────── */
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--t1);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Page layout ───────────────────────────────────────────────────── */
+    .page {
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      background:
+        radial-gradient(ellipse 90% 55% at 50% -4%, var(--accent-glow), transparent),
+        var(--bg);
+      transition: background var(--transition);
+    }
+
+    /* ── Top bar ───────────────────────────────────────────────────────── */
+    .topbar {
+      flex-shrink: 0;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Linha colorida no fundo do topbar */
+    .topbar::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg,
+        transparent   0%,
+        var(--accent) 25%,
+        var(--accent) 75%,
+        transparent 100%);
+      opacity: 0.45;
+      transition: background var(--transition);
+    }
+
+    .tb-left {
+      display: flex; flex-direction: column; gap: 2px;
+      max-width: 55vw; overflow: hidden;
+    }
+
+    .camara-nome {
+      font-size: clamp(8px, 0.65vw, 12px);
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent-text);
+      transition: color var(--transition);
+    }
+
+    .sessao-info {
+      font-size: clamp(12px, 1.05vw, 17px);
+      font-weight: 400;
+      color: var(--t2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .tb-right {
+      display: flex; align-items: center; gap: 20px;
+    }
+
+    .clock {
+      font-size: clamp(14px, 1.35vw, 22px);
+      font-weight: 300;
+      color: var(--t2);
+      letter-spacing: 0.07em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* ── Slide area ────────────────────────────────────────────────────── */
+    .slide-area {
+      flex: 1;
+      position: relative; overflow: hidden;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: clamp(20px, 3.5vh, 52px);
+    }
+
+    /* ── Animations ────────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 1; transform: translateY(0);    }
+      to   { opacity: 0; transform: translateY(-18px);}
+    }
+
+    .slide-entering { animation: fadeUp   0.50s cubic-bezier(0.22,1,0.36,1) both; }
+    .slide-leaving  { animation: fadeDown 0.35s ease-in both; }
+
+    /* ── Cover slide ───────────────────────────────────────────────────── */
+    .cover-wrap {
+      width: 100%; padding: 0 8vw; text-align: center;
+    }
+
+    .cover-eyebrow {
+      font-size: clamp(9px, 0.72vw, 13px);
+      font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--accent-text);
+      margin-bottom: clamp(10px,1.2vw,20px);
+      transition: color var(--transition);
+    }
+
+    .cover-title {
+      font-family: Georgia, 'Times New Roman', 'Palatino Linotype', serif;
+      font-size: clamp(3.5rem, 7.5vw, 10rem);
+      font-weight: bold; line-height: 1.02;
+      color: #fff;
+      margin-bottom: clamp(10px,1.2vw,20px);
+    }
+
+    .cover-sub {
+      font-size: clamp(1rem, 2vw, 2.8rem);
+      font-weight: 300; color: var(--t2);
+      margin-bottom: 6px;
+    }
+
+    .cover-date {
+      font-size: clamp(0.8rem, 1.1vw, 1.5rem);
+      color: var(--t3);
+      margin-bottom: clamp(24px,3.5vw,52px);
+    }
+
+    .cover-stats {
+      display: flex; gap: clamp(24px,5vw,70px);
+      justify-content: center; flex-wrap: wrap;
+    }
+
+    .stat-blk { text-align: center; }
+
+    .stat-n {
+      display: block;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(3rem,6vw,8rem);
+      font-weight: bold; line-height: 1;
+      color: var(--t1);
+    }
+
+    .stat-l {
+      display: block;
+      font-size: clamp(8px,0.7vw,12px);
+      font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--t3); margin-top: 8px;
+    }
+
+    /* ── Item slide ────────────────────────────────────────────────────── */
+    .item-wrap {
+      width: 100%;
+      padding-left: 7vw;
+      padding-right: clamp(200px, 16vw, 260px);
+    }
+
+    /* Cabeçalho do card (badge + status) */
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: clamp(12px,1.6vw,26px);
+    }
+
+    .period-badge {
+      display: inline-flex; align-items: center;
+      height: 30px; padding: 0 18px; border-radius: 100px;
+      font-size: clamp(8px,0.65vw,11px); font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+    }
+
+    .card-exp .period-badge { background: var(--exp-dim); color: var(--exp-text); border: 1px solid var(--exp-border); }
+    .card-ord .period-badge { background: var(--ord-dim); color: var(--ord-text); border: 1px solid var(--ord-border); }
+
+    .situacao-tag {
+      font-size: clamp(8px,0.62vw,11px); font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--t3); padding: 4px 12px;
+      border: 1px solid var(--border2); border-radius: 4px;
+    }
+
+    /* Título */
+    .slide-titulo {
+      font-family: Georgia, 'Times New Roman', 'Palatino Linotype', serif;
+      font-size: clamp(2rem,4.5vw,6rem);
+      font-weight: bold; line-height: 1.08;
+      color: #fff; letter-spacing: -0.01em;
+      margin-bottom: clamp(12px,1.6vw,26px);
+    }
+
+    /* Autor */
+    .slide-meta { margin-bottom: clamp(12px,1.4vw,22px); }
+
+    .meta-row { display: flex; align-items: baseline; gap: 14px; }
+
+    .meta-lbl {
+      font-size: clamp(8px,0.65vw,11px); font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--t3); flex-shrink: 0;
+    }
+
+    .meta-val {
+      font-size: clamp(0.95rem,1.55vw,2.1rem);
+      font-weight: 300; color: var(--t2);
+    }
+
+    /* Ementa */
+    .ementa-wrap {
+      border-top: 1px solid var(--border);
+      padding-top: clamp(12px,1.4vw,22px);
+    }
+
+    .ementa-lbl {
+      display: block;
+      font-size: clamp(8px,0.65vw,11px); font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--t3); margin-bottom: 10px;
+    }
+
+    .ementa-text {
+      font-size: clamp(0.85rem,1.42vw,1.9rem);
+      line-height: 1.52; color: var(--t1); opacity: 0.88;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* --- Segmentos clicáveis do contador (Expediente / Ordem do Dia) ------ */
+    .counter-part {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      transition: color 0.15s, opacity 0.15s;
+    }
+    .counter-part:hover { color: white; opacity: 1; }
+
+    /* ── Loading / Error ────────────────────────────────────────────────── */
+    .msg-screen {
+      text-align: center; padding: 40px;
+    }
+    .msg-title {
+      font-family: Georgia, serif;
+      font-size: clamp(1.5rem,3vw,4rem);
+      color: var(--t2); margin-bottom: 14px;
+    }
+    .msg-sub {
+      font-size: clamp(0.85rem,1.2vw,1.5rem);
+      color: var(--t3);
+    }
+    .dot-blink {
+      display: inline-block;
+      animation: blink 1.2s steps(1) infinite;
+    }
+    @keyframes blink { 0%,66%{opacity:1} 33%{opacity:0} }
+
+    /* ── Footer ────────────────────────────────────────────────────────── */
+    .footer {
+      flex-shrink: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .progress-track {
+      width: 100%; height: 3px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .progress-fill {
+      height: 100%; width: 0%;
+      background: var(--accent);
+      transition: background var(--transition);
+      will-change: width;
+    }
+
+    .footer-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 11px 30px;
+    }
+
+    .ctrl-grp { display: flex; align-items: center; gap: 5px; }
+
+    .ctrl-btn {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--t2); cursor: pointer;
+      font-size: 0.82rem; line-height: 1;
+      transition: background 0.14s, color 0.14s, border-color 0.14s;
+      user-select: none;
+    }
+    .ctrl-btn:hover  { background: rgba(255,255,255,0.09); color: #fff; }
+    .ctrl-btn:active { background: rgba(255,255,255,0.14); }
+    .ctrl-btn.is-paused { color: var(--accent-text); border-color: var(--accent); }
+
+    .footer-mid {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px;
+    }
+
+    .counter-display {
+      font-size: clamp(11px,1.05vw,17px);
+      font-weight: 500; color: var(--t2);
+      font-variant-numeric: tabular-nums; letter-spacing: 0.04em;
+      white-space: nowrap; text-align: center;
+    }
+
+    .footer-right {
+      display: flex; align-items: center; gap: 14px;
+      justify-content: flex-end;
+    }
+
+    .speed-ctrl {
+      display: flex; align-items: center; gap: 6px;
+      font-size: clamp(8px,0.65vw,11px); color: var(--t3);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    .speed-select {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--t2); font-size: clamp(8px,0.65vw,11px);
+      padding: 4px 8px; border-radius: 5px; cursor: pointer;
+    }
+    .speed-select option { background: #1e2435; }
+
+    .hint-text {
+      font-size: clamp(7px,0.6vw,10px);
+      color: var(--t3); letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    /* ── Banner LGPD ────────────────────────────────────────────────────── */
+    .lgpd-banner {
+      flex-shrink: 0;
+      background: #1059c1;
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 1.8vw, 28px);
+      padding: clamp(10px, 1.4vh, 18px) clamp(20px, 2.5vw, 40px);
+      border-top: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .lgpd-logo {
+      height: clamp(44px, 6vh, 70px);
+      width: auto;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .lgpd-text {
+      font-size: clamp(0.85rem, 1.3vw, 1.7rem);
+      color: #ffffff;
+      font-weight: 500;
+      line-height: 1.38;
+    }
+    /* ── QR Code Panel ──────────────────────────────────────────────────── */
+    .qr-panel {
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 5;
+    }
+
+    .qr-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 10px 10px 7px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    }
+
+    .qr-img {
+      width: clamp(100px, 9vw, 145px);
+      height: auto;
+      display: block;
+      border-radius: 3px;
+    }
+
+    .qr-lbl {
+      display: block;
+      width: clamp(100px, 9vw, 145px);
+      font-size: clamp(7px, 0.58vw, 10px);
+      color: #1a1a2e;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <main class="page" id="page">
+
+    <header class="topbar">
+      <div class="tb-left">
+        <!-- PERSONALIZE: altere o nome da sua Câmara aqui -->
+        <div class="camara-nome" id="camara-nome">CÂMARA MUNICIPAL DE ITABIRITO</div>
+        <div class="sessao-info" id="sessao-info">Pauta da Sessão</div>
+      </div>
+      <div class="tb-right">
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </header>
+
+    <div class="slide-area" id="slide-area">
+      <div id="slide-content">
+        <div class="msg-screen">
+          <div class="msg-title">Carregando pauta<span class="dot-blink">...</span></div>
+          <div class="msg-sub">Aguardando dados do painel SAPL</div>
+        </div>
+      </div>
+      <!-- QR panel injected here by display-pauta.js -->
+    </div>
+
+    <div class="lgpd-banner">
+      <img class="lgpd-logo" src="logo.png" alt="Câmara Municipal de Itabirito" />
+      <p class="lgpd-text">Informamos que nos termos do art. 7º da Lei 13.709 de 2018 (LGPD) essa sessão será gravada e transmitida pelo nosso canal do YouTube.</p>
+    </div>
+
+    <footer class="footer">
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="footer-row">
+
+        <div class="ctrl-grp">
+          <button class="ctrl-btn" id="btn-prev" title="Anterior (←)">&#9664;</button>
+          <button class="ctrl-btn" id="btn-pp"   title="Pausar (Espaço)">&#9646;&#9646;</button>
+          <button class="ctrl-btn" id="btn-next" title="Próximo (→)">&#9654;</button>
+          <button class="ctrl-btn" id="btn-fs"   title="Tela cheia (F)">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor">
+              <path d="M0 0h4v1H1v3H0V0zm7 0h4v4h-1V1H7V0zM0 7h1v3h3v1H0V7zm10 3H7v1h4V7h-1v3z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="footer-mid">
+          <div class="counter-display" id="counter">—</div>
+        </div>
+
+        <div class="footer-right">
+          <div class="speed-ctrl">
+            <span>Intervalo</span>
+            <select class="speed-select" id="speed-select">
+              <option value="6000">6 s</option>
+              <option value="8000">8 s</option>
+              <option value="10000">10 s</option>
+              <option value="12000" selected>12 s</option>
+              <option value="15000">15 s</option>
+              <option value="20000">20 s</option>
+              <option value="30000">30 s</option>
+            </select>
+          </div>
+          <div class="hint-text">← → Navegar &nbsp;·&nbsp; Espaço Pausar</div>
+        </div>
+
+      </div>
+    </footer>
+  </main>
+
+  <script src="display-pauta.js"></script>
+</body>
+</html>
