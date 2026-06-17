@@ -390,9 +390,12 @@
       white-space: nowrap;
     }
     /* ── Banner LGPD ────────────────────────────────────────────────────── */
+    /* PERSONALIZE: altere a cor de fundo do banner abaixo.
+       Para REMOVER o banner, apague todo este bloco CSS e o bloco HTML
+       <div class="lgpd-banner">...</div> que está mais abaixo.          */
     .lgpd-banner {
       flex-shrink: 0;
-      background: #1059c1;
+      background: #1059c1;   /* ← cor do banner — altere para a cor da sua instituição */
       display: flex;
       align-items: center;
       gap: clamp(14px, 1.8vw, 28px);
@@ -476,6 +479,14 @@
       <!-- QR panel injected here by display-pauta.js -->
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════
+         BANNER DE AVISO (LGPD ou outro)
+         Para REMOVER o banner: apague as 5 linhas abaixo (do <div> ao </div>)
+             e o bloco CSS .lgpd-banner / .lgpd-logo / .lgpd-text no <style>.
+         Para alterar a COR: veja o comentário em .lgpd-banner no CSS acima.
+         Para alterar o TEXTO: edite o conteúdo do <p> abaixo.
+         Para alterar o LOGO: substitua o arquivo logo.png pelo brasão da sua Câmara.
+         ═══════════════════════════════════════════════════════════════════ -->
     <div class="lgpd-banner">
       <img class="lgpd-logo" src="logo.png" alt="Câmara Municipal de Itabirito" />
       <p class="lgpd-text">Informamos que nos termos do art. 7º da Lei 13.709 de 2018 (LGPD) essa sessão será gravada e transmitida pelo nosso canal do YouTube.</p>
