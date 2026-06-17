@@ -5,14 +5,6 @@ Extensão Chrome/Edge que abre automaticamente um slideshow com as matérias da 
 
 ---
 
-## Visual
-
-### Tema escuro
-![Slide de matéria — tema escuro](tema-escuro.png)
-
-### Tema claro
-![Slide de matéria — tema claro](tema-claro.png)
-
 
 ## O que aparece em cada slide
 
@@ -144,6 +136,17 @@ Após qualquer alteração: `chrome://extensions` → botão **Recarregar** na e
 | `display-pauta.html` | Layout visual — **alterar nome da Câmara e cores aqui** |
 | `display-pauta.js` | Lógica do slideshow — não precisa alterar |
 | `logo.png` | Brasão exibido no banner LGPD — substituir pelo da sua Câmara |
+
+---
+
+## Visual
+
+### Tema escuro
+![Slide de matéria — tema escuro](tema-escuro.png)
+
+### Tema claro
+![Slide de matéria — tema claro](tema-claro.png)
+
 
 ---
 
