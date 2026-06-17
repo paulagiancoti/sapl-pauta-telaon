@@ -47,7 +47,9 @@
   }
 
   // ── Busca a URL do PDF da pauta (campo upload_pauta) ─────────────────────
-  // Tenta múltiplas URLs da API em ordem de prioridade.
+  // Para na primeira URL que devolver JSON válido com o campo upload_pauta.
+  // Se a sessão ainda não tiver PDF publicado, upload_pauta será null —
+  // nesse caso retorna null sem tentar as URLs seguintes.
   async function fetchPdfUrl() {
     const candidates = [
       `${location.origin}/api/sessao/sessaoplenaria/${sessionId}/`,
@@ -58,22 +60,23 @@
 
     for (const url of candidates) {
       try {
-        console.info(`[SAPL pauta] tentando PDF via: ${url}`);
         const res = await fetch(url, { credentials: "same-origin" });
-        if (!res.ok) {
-          console.warn(`[SAPL pauta] ${url} → HTTP ${res.status}`);
-          continue;
-        }
+        if (!res.ok) continue;   // tenta a próxima URL silenciosamente
+
         const data = await res.json();
-        const pdf  = data?.upload_pauta || null;
-        console.info(`[SAPL pauta] upload_pauta: ${pdf}`);
-        if (pdf) return pdf;
-      } catch (err) {
-        console.warn(`[SAPL pauta] falha em ${url}:`, err.message);
+
+        // Encontrou JSON com o campo esperado — para aqui independente do valor
+        if ("upload_pauta" in data) {
+          const pdf = data.upload_pauta || null;
+          console.info(`[SAPL pauta] upload_pauta: ${pdf || "não publicado ainda"}`);
+          return pdf;
+        }
+      } catch {
+        // JSON inválido ou erro de rede — tenta a próxima URL
       }
     }
 
-    console.warn("[SAPL pauta] PDF não encontrado.");
+    console.info("[SAPL pauta] Não foi possível obter dados da sessão via API.");
     return null;
   }
 
