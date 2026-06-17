@@ -2,7 +2,17 @@
 
 Extensão Chrome/Edge que abre automaticamente um slideshow com as matérias da pauta da sessão plenária, ideal para exibição no **telão do plenário** antes ou durante a sessão.
 
+
 ---
+
+## Visual
+
+### Tema escuro
+![Slide de matéria — tema escuro](tema-escuro.png)
+
+### Tema claro
+![Slide de matéria — tema claro](tema-claro.png)
+
 
 ## O que aparece em cada slide
 
